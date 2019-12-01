@@ -1,13 +1,22 @@
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { Editor, shapes } from "./editor/editor";
+
+const randomFromRange = (min, max) => Math.random() * (max - min) + min;
+const shapeNames = Object.keys(shapes);
 
 class App extends Component {
   componentDidMount() {
+    this.shapes = {};
     this.sceneSetup();
-    this.addCustomSceneObjects();
     this.startAnimationLoop();
     window.addEventListener("resize", this.handleWindowResize);
+  }
+
+  constructor() {
+    super();
+    this.editor = new Editor();
   }
 
   componentWillUnmount() {
@@ -48,26 +57,38 @@ class App extends Component {
     // OrbitControls allow a camera to orbit around the object
     // https://threejs.org/docs/#examples/controls/OrbitControls
     this.controls = new OrbitControls(this.camera, this.el);
+
     this.renderer = new THREE.WebGLRenderer();
     this.renderer.setSize(width, height);
+
+    window.THREE = THREE;
+    window.controls = this.controls;
+    window.scene = this.scene;
+    window.renderer = this.renderer;
+
     this.el.appendChild(this.renderer.domElement); // mount using React ref
   };
 
-  addCustomSceneObjects = () => {
-    const geometry = new THREE.BoxGeometry(2, 2, 2);
-    const material = new THREE.MeshPhongMaterial({
-      color: 0x156289,
-      emissive: 0x072534,
-      side: THREE.DoubleSide,
-      flatShading: true
-    });
-    this.cube = new THREE.Mesh(geometry, material);
-    this.scene.add(this.cube);
+  addRandomMesh = () => {
+    const shapeIndex = Math.round(randomFromRange(0, shapeNames.length - 1)),
+      shapePosition = {
+        x: randomFromRange(-4, 4),
+        y: randomFromRange(-3, 3),
+        z: randomFromRange(-1, 2)
+      };
+    const shape = this.editor.addShape(
+      shapeNames[shapeIndex],
+      this.scene,
+      shapePosition
+    );
+    this.shapes[shape.id] = shape;
   };
 
   startAnimationLoop = () => {
-    this.cube.rotation.x += 0.01;
-    this.cube.rotation.y += 0.01;
+    for (const { mesh } of Object.values(this.shapes)) {
+      mesh.rotation.x += 0.01;
+      mesh.rotation.y += 0.01;
+    }
 
     this.renderer.render(this.scene, this.camera);
     this.controls.update();
@@ -82,13 +103,18 @@ class App extends Component {
     this.renderer.setSize(width, height);
     this.camera.aspect = width / height;
 
-    // Note that after making changes to most of camera properties you have to call
-    // .updateProjectionMatrix for the changes to take effect.
     this.camera.updateProjectionMatrix();
   };
 
   render() {
-    return <div className={"viewport"} ref={ref => (this.el = ref)} />;
+    return (
+      <Fragment>
+        <button className={"add-shape-button"} onClick={this.addRandomMesh}>
+          Add shape
+        </button>
+        <div className={"viewport"} ref={ref => (this.el = ref)} />
+      </Fragment>
+    );
   }
 }
 

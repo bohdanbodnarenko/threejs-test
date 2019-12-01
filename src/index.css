@@ -7,3 +7,20 @@ body {
   height: 100vh;
   padding: 0;
 }
+
+canvas {
+  display: block;
+}
+
+.add-shape-button {
+  z-index: 100;
+  position: fixed;
+  height: 3vh;
+  border-radius: 25px;
+  padding: 0 10px;
+  text-align: center;
+  right: 7vw;
+  bottom: 3vh;
+  outline: none;
+  font-weight: 500;
+}
