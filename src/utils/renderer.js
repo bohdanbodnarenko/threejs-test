@@ -12,13 +12,17 @@ export class Renderer {
   unmount(requestID) {
     window.removeEventListener("resize", this.handleWindowResize);
     window.cancelAnimationFrame(requestID);
-    this.controls.dispose();
+    this.orbitControls.dispose();
   }
 
   render() {
     this.renderer.render(this.scene, this.camera);
     this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.controls.update();
+    this.orbitControls.update();
+  }
+
+  get domElement() {
+    return this.renderer.domElement;
   }
 
   init() {
@@ -49,14 +53,16 @@ export class Renderer {
       0.1, // near plane
       1000 // far plane
     );
-    this.camera.position.z = 5;
-    this.controls = new OrbitControls(this.camera, this.targetForCanvas);
+    this.camera.position.z = 150;
+
+    this.orbitControls = new OrbitControls(this.camera, this.targetForCanvas);
+    this.orbitControls.zoomSpeed = 0.2;
 
     this.renderer = new THREE.WebGLRenderer();
     this.renderer.setSize(width, height);
 
     window.THREE = THREE;
-    window.controls = this.controls;
+    window.controls = this.orbitControls;
     window.scene = this.scene;
     window.renderer = this.renderer;
 
@@ -77,6 +83,8 @@ export class Renderer {
 
     const stars = new THREE.Points(starGeometry, starMaterial);
     this.scene.add(stars);
+
+    this.raycaster = new THREE.Raycaster();
 
     this.renderer.domElement.addEventListener(
       "mousedown",
@@ -119,6 +127,23 @@ export class Renderer {
     this.camera.updateProjectionMatrix();
   };
 
+  checkMouseIntersection(event, objects) {
+    const mouse = new THREE.Vector2(
+      (event.clientX / window.innerWidth) * 2 - 1,
+      -(event.clientY / window.innerHeight) * 2 + 1
+    );
+
+    this.raycaster.setFromCamera(mouse, this.camera);
+
+    const intersects = this.raycaster.intersectObjects(objects);
+
+    if (!intersects.length) {
+      return null;
+    }
+
+    return intersects[0];
+  }
+
   onMouseDown(callback) {
     this.emitMouseDown = callback;
   }
@@ -133,5 +158,12 @@ export class Renderer {
 
   onContextMenu(callback) {
     this.emitContextMenu = callback;
+  }
+
+  enableOrbitControl() {
+    this.orbitControls.enabled = true;
+  }
+  disableOrbitControl() {
+    this.orbitControls.enabled = false;
   }
 }
