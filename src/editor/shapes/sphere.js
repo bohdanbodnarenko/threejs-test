@@ -6,10 +6,6 @@ export class SphereShape extends Shape {
   constructor(name) {
     super(name);
 
-    this.mesh.geometry = new THREE.SphereGeometry(0.5, 16, 16).translate(
-      0,
-      0.5,
-      0
-    );
+    this.mesh.geometry = new THREE.SphereGeometry(5, 32, 32);
   }
 }

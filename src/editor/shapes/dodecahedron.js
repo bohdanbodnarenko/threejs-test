@@ -6,7 +6,7 @@ export class DodecahedronShape extends Shape {
   constructor(name) {
     super(name);
 
-    this.mesh.geometry = new THREE.DodecahedronGeometry(0.5, 0).translate(
+    this.mesh.geometry = new THREE.DodecahedronGeometry(15, 0).translate(
       0,
       0.5,
       0

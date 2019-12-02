@@ -6,6 +6,6 @@ export class CubeShape extends Shape {
   constructor(name) {
     super(name);
 
-    this.mesh.geometry = new THREE.BoxGeometry(1, 1, 1);
+    this.mesh.geometry = new THREE.BoxGeometry(10, 10, 10);
   }
 }

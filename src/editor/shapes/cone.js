@@ -6,6 +6,6 @@ export class Cone extends Shape {
   constructor(name) {
     super(name);
 
-    this.mesh.geometry = new THREE.ConeGeometry(0.5, 3, 16);
+    this.mesh.geometry = new THREE.ConeGeometry(5, 20, 32   );
   }
 }

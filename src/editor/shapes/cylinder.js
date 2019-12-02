@@ -6,6 +6,6 @@ export class Cylinder extends Shape {
   constructor(name) {
     super(name);
 
-    this.mesh.geometry = new THREE.CylinderGeometry(1, 1, 1.5, 32);
+    this.mesh.geometry = new THREE.CylinderGeometry(10, 10, 20, 32);
   }
 }
