@@ -127,7 +127,7 @@ export class Renderer {
     this.camera.updateProjectionMatrix();
   };
 
-  checkMouseIntersection(event, objects) {
+  checkMouseIntersection = (event, objects) => {
     const mouse = new THREE.Vector2(
       (event.clientX / window.innerWidth) * 2 - 1,
       -(event.clientY / window.innerHeight) * 2 + 1
@@ -142,7 +142,7 @@ export class Renderer {
     }
 
     return intersects[0];
-  }
+  };
 
   onMouseDown(callback) {
     this.emitMouseDown = callback;

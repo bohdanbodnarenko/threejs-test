@@ -7,6 +7,7 @@ export const shapes = shapeTypes;
 export class Editor {
   constructor(targetElement) {
     this.shapes = {};
+    this.movingShapes = [];
 
     this.renderer = new Renderer(targetElement);
     this.renderer.onMouseMove(this.handleMouseMove);
@@ -47,19 +48,33 @@ export class Editor {
   }
 
   render() {
-    for (const { mesh } of Object.values(this.shapes)) {
-      mesh.rotation.x += 0.01;
-      mesh.rotation.y += 0.01;
+    for (const id of this.movingShapes) {
+      this.shapes[id].mesh.rotation.x += 0.01;
+      this.shapes[id].mesh.rotation.y += 0.01;
     }
 
     this.renderer.render();
   }
 
   handleDragStart = event => {
+    console.log(event);
     this.renderer.disableOrbitControl();
-    console.log(event.target.data);
   };
 
   handleMouseMove(event) {}
-  handleMouseDown(event) {}
+  handleMouseDown = event => {
+    const intersect = this.renderer.checkMouseIntersection(
+      event,
+      Object.values(this.shapes).map(({ mesh }) => mesh)
+    );
+    if (intersect) {
+      const { uuid } = intersect.object;
+      if (this.movingShapes.includes(uuid)) {
+        const index = this.movingShapes.indexOf(uuid);
+        this.movingShapes.splice(index, 1);
+      } else {
+        this.movingShapes.push(uuid);
+      }
+    }
+  };
 }
