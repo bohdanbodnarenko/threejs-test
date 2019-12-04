@@ -1,4 +1,4 @@
-import { DragControls } from "three/examples/jsm/controls/DragControls";
+import * as THREE from "three";
 
 import * as shapeTypes from "./shapes/";
 import { Renderer } from "../utils/renderer";
@@ -7,11 +7,15 @@ export const shapes = shapeTypes;
 export class Editor {
   constructor(targetElement) {
     this.shapes = {};
-    this.movingShapes = [];
+    this.dragShape = null;
+    this.dragShapeValues = {
+      collision: false
+    };
 
     this.renderer = new Renderer(targetElement);
     this.renderer.onMouseMove(this.handleMouseMove);
     this.renderer.onMouseDown(this.handleMouseDown);
+    this.renderer.onMouseUp(this.handleMouseUp);
   }
 
   addShape(type, position = { x: 0, y: 0, z: 0 }) {
@@ -30,17 +34,21 @@ export class Editor {
 
     shape.addToScene(this.renderer.scene);
 
-    this.shapes[shape.id] = shape;
+    this.shapes[shape.id] = {
+      ...shape,
+      rotate: true
+    };
 
-    this.dragControls = new DragControls(
-      Object.values(this.shapes).map(({ mesh }) => mesh),
-      this.renderer.camera,
-      this.renderer.domElement
-    );
-    this.dragControls.addEventListener("dragstart", this.handleDragStart);
-    this.dragControls.addEventListener("dragend", () => {
-      this.renderer.enableOrbitControl();
-    });
+    // this.dragControls = new DragControls(
+    //   Object.values(this.shapes).map(({ mesh }) => mesh),
+    //   this.renderer.camera,
+    //   this.renderer.domElement
+    // );
+    // this.dragControls.addEventListener("dragstart", this.handleDragStart);
+    // this.dragControls.addEventListener("drag", this.handleDrag);
+    // this.dragControls.addEventListener("dragend", () => {
+    //   this.renderer.enableOrbitControl();
+    // });
   }
 
   unmount(requestID) {
@@ -48,33 +56,88 @@ export class Editor {
   }
 
   render() {
-    for (const id of this.movingShapes) {
-      this.shapes[id].mesh.rotation.x += 0.01;
-      this.shapes[id].mesh.rotation.y += 0.01;
+    for (const { mesh } of Object.values(this.shapes).filter(
+      ({ rotate }) => rotate
+    )) {
+      mesh.rotation.x += 0.01;
+      mesh.rotation.y += 0.01;
     }
 
     this.renderer.render();
   }
 
-  handleDragStart = event => {
-    console.log(event);
-    this.renderer.disableOrbitControl();
-  };
-
-  handleMouseMove(event) {}
   handleMouseDown = event => {
     const intersect = this.renderer.checkMouseIntersection(
       event,
       Object.values(this.shapes).map(({ mesh }) => mesh)
     );
     if (intersect) {
-      const { uuid } = intersect.object;
-      if (this.movingShapes.includes(uuid)) {
-        const index = this.movingShapes.indexOf(uuid);
-        this.movingShapes.splice(index, 1);
-      } else {
-        this.movingShapes.push(uuid);
+      const { userData } = intersect.object;
+
+      this.shapes[userData.id].rotate = false;
+
+      const { position, color } = userData;
+      this.dragShape = userData;
+      this.dragShapeValues = { position: { ...position }, color };
+      this.renderer.disableOrbitControl();
+    }
+  };
+
+  handleMouseMove = event => {
+    if (!this.dragShape) {
+      return;
+    }
+
+    const intersect = this.renderer.checkMouseIntersection(event);
+
+    if (!intersect) {
+      return;
+    }
+
+    const { uuid } = this.dragShape.mesh;
+    const meshesForCollision = Object.entries(this.shapes).reduce(
+      (acc, [key, { mesh }]) => (key !== uuid ? acc.concat(mesh) : acc),
+      []
+    );
+
+    const shapeIntersect = this.renderer.checkMouseIntersection(
+      event,
+      meshesForCollision
+    );
+
+    if (shapeIntersect) {
+      const firstBB = new THREE.Box3().setFromObject(intersect.object);
+      const secondBB = new THREE.Box3().setFromObject(shapeIntersect.object);
+      const collision = firstBB.intersectsBox(secondBB);
+
+      if (collision) {
+        this.dragShapeValues.collision = true;
+        this.dragShape.color = "#ff0000";
       }
+    } else {
+      if (this.dragShapeValues.collision) {
+        this.dragShapeValues.collision = false;
+        this.dragShape.color = this.dragShapeValues.color;
+      }
+    }
+
+    this.dragShape.opacity = 0.25;
+    this.dragShape.position = intersect.point.clone();
+  };
+
+  handleMouseUp = () => {
+    if (this.dragShape) {
+      this.renderer.enableOrbitControl();
+
+      const { position, color } = this.dragShapeValues;
+      if (this.dragShapeValues.collision) {
+        this.dragShape.position = position;
+      }
+
+      this.dragShape.color = color;
+      this.dragShape.opacity = 1;
+      this.shapes[this.dragShape.id].rotate = true;
+      this.dragShape = null;
     }
   };
 }

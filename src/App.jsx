@@ -1,4 +1,6 @@
 import React, { Component, Fragment } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { Button } from "react-bootstrap";
 
 import { Editor, shapes } from "./editor/editor";
 
@@ -9,16 +11,13 @@ class App extends Component {
   state = {
     position: {
       x: {
-        min: -130,
-        max: 130
+        min: -230,
+        max: 230
       },
-      y: {
-        min: -70,
-        max: 70
-      },
+      y: -50,
       z: {
-        min: -100,
-        max: 100
+        min: -150,
+        max: 150
       }
     }
   };
@@ -37,7 +36,7 @@ class App extends Component {
     const shapeIndex = Math.round(randomFromRange(0, shapeNames.length - 1)),
       shapePosition = {
         x: randomFromRange(x.min, x.max),
-        y: randomFromRange(y.min, y.max),
+        y,
         z: randomFromRange(z.min, z.max)
       };
     this.editor.addShape(shapeNames[shapeIndex], shapePosition);
@@ -51,9 +50,9 @@ class App extends Component {
   render() {
     return (
       <Fragment>
-        <button className={"add-shape-button"} onClick={this.addRandomMesh}>
+        <Button className={"add-shape-button"} onClick={this.addRandomMesh}>
           Add shape
-        </button>
+        </Button>
         <div className={"viewport"} ref={ref => (this.el = ref)} />
       </Fragment>
     );

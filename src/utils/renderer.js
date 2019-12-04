@@ -84,6 +84,22 @@ export class Renderer {
     const stars = new THREE.Points(starGeometry, starMaterial);
     this.scene.add(stars);
 
+    this.floor = new THREE.Mesh(
+      new THREE.PlaneGeometry(1000, 1000),
+      new THREE.MeshBasicMaterial({ visible: false })
+    );
+    this.floor.name = "Floor";
+    this.floor.position.y = -50;
+    this.floor.rotation.x = -Math.PI / 2;
+    this.scene.add(this.floor);
+
+    this.grid = new THREE.GridHelper(1000, 1000, 0x0000ff, 0x808080);
+    this.grid.name = "Grid";
+    this.grid.position.y = -50;
+    this.grid.material.transparent = true;
+    this.grid.material.opacity = 0.25;
+    this.scene.add(this.grid);
+
     this.raycaster = new THREE.Raycaster();
 
     this.renderer.domElement.addEventListener(
@@ -135,7 +151,9 @@ export class Renderer {
 
     this.raycaster.setFromCamera(mouse, this.camera);
 
-    const intersects = this.raycaster.intersectObjects(objects);
+    const intersects = objects
+      ? this.raycaster.intersectObjects(objects)
+      : this.raycaster.intersectObject(this.floor);
 
     if (!intersects.length) {
       return null;

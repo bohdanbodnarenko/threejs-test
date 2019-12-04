@@ -10,6 +10,7 @@ export default class Shape {
       side: THREE.DoubleSide,
       flatShading: true
     });
+    this.mesh.userData = this;
   }
 
   get id() {
