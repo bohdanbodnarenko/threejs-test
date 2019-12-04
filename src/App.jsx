@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from "react";
+import { Button, ButtonToolbar } from "react-bootstrap";
+
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Button } from "react-bootstrap";
 
 import { Editor, shapes } from "./editor/editor";
 
@@ -19,7 +20,8 @@ class App extends Component {
         min: -150,
         max: 150
       }
-    }
+    },
+    deleting: false
   };
 
   componentDidMount() {
@@ -30,6 +32,10 @@ class App extends Component {
   componentWillUnmount() {
     // this.editor.unmount(this.requestID);
   }
+
+  toggleDeleting = () => {
+    this.setState({ deleting: !this.state.deleting });
+  };
 
   addRandomMesh = () => {
     const { x, y, z } = this.state.position;
@@ -48,11 +54,23 @@ class App extends Component {
   };
 
   render() {
+    const { deleting } = this.state;
+    if (this.editor) {
+      this.editor.deleteOnClick = deleting;
+    }
     return (
       <Fragment>
-        <Button className={"add-shape-button"} onClick={this.addRandomMesh}>
-          Add shape
-        </Button>
+        <ButtonToolbar className={"button-container"}>
+          <Button onClick={this.addRandomMesh} variant={"outline-primary"}>
+            Add shape
+          </Button>
+          <Button
+            onClick={this.toggleDeleting}
+            variant={deleting ? "danger" : "outline-danger"}
+          >
+            Delete shape
+          </Button>
+        </ButtonToolbar>
         <div className={"viewport"} ref={ref => (this.el = ref)} />
       </Fragment>
     );

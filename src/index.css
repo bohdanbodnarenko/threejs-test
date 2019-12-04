@@ -12,8 +12,10 @@ canvas {
   display: block;
 }
 
-.add-shape-button {
+.button-container {
+  display: flex;
   position: fixed;
-  right: 7vw;
-  bottom: 3vh;
+  bottom: 2.5vh;
+  left: 80vw;
+  right: 5vw;
 }

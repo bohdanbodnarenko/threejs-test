@@ -8,9 +8,10 @@ export class Editor {
   constructor(targetElement) {
     this.shapes = {};
     this.dragShape = null;
-    this.dragShapeValues = {
+    this.dragShapeInitValues = {
       collision: false
     };
+    this.deleteOnClick = false;
 
     this.renderer = new Renderer(targetElement);
     this.renderer.onMouseMove(this.handleMouseMove);
@@ -72,13 +73,19 @@ export class Editor {
       Object.values(this.shapes).map(({ mesh }) => mesh)
     );
     if (intersect) {
+      console.log(this.deleteOnClick);
+      if (this.deleteOnClick) {
+        delete this.shapes[intersect.object.uuid];
+        intersect.object.userData.removeFromScene();
+        return;
+      }
       const { userData } = intersect.object;
 
       this.shapes[userData.id].rotate = false;
 
       const { position, color } = userData;
       this.dragShape = userData;
-      this.dragShapeValues = { position: { ...position }, color };
+      this.dragShapeInitValues = { position: { ...position }, color };
       this.renderer.disableOrbitControl();
     }
   };
@@ -88,6 +95,8 @@ export class Editor {
       return;
     }
 
+    console.log(this.dragShape);
+    //TODO change x and y to shape limits
     const intersect = this.renderer.checkMouseIntersection(event);
 
     if (!intersect) {
@@ -111,13 +120,13 @@ export class Editor {
       const collision = firstBB.intersectsBox(secondBB);
 
       if (collision) {
-        this.dragShapeValues.collision = true;
+        this.dragShapeInitValues.collision = true;
         this.dragShape.color = "#ff0000";
       }
     } else {
-      if (this.dragShapeValues.collision) {
-        this.dragShapeValues.collision = false;
-        this.dragShape.color = this.dragShapeValues.color;
+      if (this.dragShapeInitValues.collision) {
+        this.dragShapeInitValues.collision = false;
+        this.dragShape.color = this.dragShapeInitValues.color;
       }
     }
 
@@ -129,8 +138,8 @@ export class Editor {
     if (this.dragShape) {
       this.renderer.enableOrbitControl();
 
-      const { position, color } = this.dragShapeValues;
-      if (this.dragShapeValues.collision) {
+      const { position, color } = this.dragShapeInitValues;
+      if (this.dragShapeInitValues.collision) {
         this.dragShape.position = position;
       }
 
