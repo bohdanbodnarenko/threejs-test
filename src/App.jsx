@@ -48,6 +48,10 @@ class App extends Component {
     this.editor.addShape(shapeNames[shapeIndex], shapePosition);
   };
 
+  handleFitCameraClick = () => {
+    this.editor.fitCameraToCustomModel();
+  };
+
   handleAddModelClick = () => {
     this.editor.addCustomModel();
   };
@@ -77,7 +81,7 @@ class App extends Component {
           <Button onClick={this.handleAddModelClick} variant={"primary"}>
             Add model
           </Button>
-          <Button onClick={this.addRandomMesh} variant={"primary"}>
+          <Button onClick={this.handleFitCameraClick} variant={"primary"}>
             Fit camera to model
           </Button>
         </div>

@@ -20,7 +20,17 @@ export class Editor {
     this.renderer.onMouseUp(this.handleMouseUp);
   }
 
+  fitCameraToCustomModel = () => {
+    if (this.customModel) {
+      this.renderer.fitCameraToObject(this.customModel);
+    } else {
+      alert("First create a custom model");
+    }
+  };
+
   addShape(type, position = { x: 0, y: 0, z: 0 }) {
+    if (this.customModel) {
+    }
     if (!shapes[type]) {
       console.warn(`Shape with type "${type}" does not exist`);
       return null;
@@ -61,10 +71,15 @@ export class Editor {
     const loader = new GLTFLoader();
     loader.load("Soldier.glb", gltf => {
       const model = gltf.scene;
+
+      model.name = "SoldierModel";
       model.rotateY(Math.PI);
       model.scale.set(20, 20, 20);
       model.position.set(0, -50, 0);
+      this.customModel = model;
+
       this.renderer.scene.add(model);
+
       model.traverse(object => {
         if (object.isMesh) object.castShadow = true;
       });

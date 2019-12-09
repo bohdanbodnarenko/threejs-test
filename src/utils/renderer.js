@@ -71,6 +71,7 @@ export class Renderer {
     window.controls = this.orbitControls;
     window.scene = this.scene;
     window.renderer = this.renderer;
+    window.customRenderer = this;
 
     const starMaterial = new THREE.PointsMaterial({
       color: "#bbd8ff",
@@ -147,7 +148,7 @@ export class Renderer {
     this.renderer.setSize(width, height);
     this.camera.aspect = width / height;
 
-    this.camera.updateProjectionMatrix();
+    // this.camera.updateProjectionMatrix();
   };
 
   checkMouseIntersection = (event, objects) => {
@@ -167,6 +168,37 @@ export class Renderer {
     }
 
     return intersects[0];
+  };
+
+  fitCameraToObject = (object, offset = 5) => {
+    const boundingBox = new THREE.Box3();
+
+    boundingBox.setFromObject(object);
+
+    const center = boundingBox.getCenter();
+
+    const size = boundingBox.getSize();
+
+    // get the max side of the bounding box (fits to width OR height as needed )
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const fov = this.camera.fov * (Math.PI / 180);
+    let cameraZ = Math.abs((maxDim / 4) * Math.cos(fov * 2));
+
+    cameraZ *= offset; // zoom out a little so that objects don't fill the screen
+
+    this.camera.position.z = cameraZ;
+    this.camera.position.y = -25; //half of init state as shapes on 2D
+
+    this.camera.updateProjectionMatrix();
+
+    if (this.orbitControls) {
+      // set camera to rotate around center of loaded object
+      this.orbitControls.target = center;
+
+      this.orbitControls.saveState();
+    } else {
+      this.camera.lookAt(center);
+    }
   };
 
   onMouseDown(callback) {

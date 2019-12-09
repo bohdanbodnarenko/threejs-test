@@ -3,6 +3,7 @@ import * as THREE from "three";
 export default class Shape {
   constructor(name) {
     this.mesh = new THREE.Mesh();
+    this.mesh.receiveShadow = true;
     this.mesh.name = name;
     this.mesh.material = new THREE.MeshPhongMaterial({
       color: Math.random() * 0xffffff,
