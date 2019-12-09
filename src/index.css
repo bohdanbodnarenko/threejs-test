@@ -13,9 +13,11 @@ canvas {
 }
 
 .button-container {
-  display: flex;
   position: fixed;
-  bottom: 2.5vh;
-  left: 80vw;
+  display: flex;
+  justify-content: space-evenly;
+  bottom: 2vh;
   right: 5vw;
+  width: 30vw;
+  flex-wrap: wrap;
 }

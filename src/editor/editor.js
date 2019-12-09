@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 import * as shapeTypes from "./shapes/";
 import { Renderer } from "../utils/renderer";
@@ -56,6 +57,20 @@ export class Editor {
     this.renderer.unmount(requestID);
   }
 
+  addCustomModel = () => {
+    const loader = new GLTFLoader();
+    loader.load("Soldier.glb", gltf => {
+      const model = gltf.scene;
+      model.rotateY(Math.PI);
+      model.scale.set(20, 20, 20);
+      model.position.set(0, -50, 0);
+      this.renderer.scene.add(model);
+      model.traverse(object => {
+        if (object.isMesh) object.castShadow = true;
+      });
+    });
+  };
+
   render() {
     for (const { mesh } of Object.values(this.shapes).filter(
       ({ rotate }) => rotate
@@ -73,7 +88,6 @@ export class Editor {
       Object.values(this.shapes).map(({ mesh }) => mesh)
     );
     if (intersect) {
-      console.log(this.deleteOnClick);
       if (this.deleteOnClick) {
         delete this.shapes[intersect.object.uuid];
         intersect.object.userData.removeFromScene();
@@ -95,7 +109,6 @@ export class Editor {
       return;
     }
 
-    console.log(this.dragShape);
     //TODO change x and y to shape limits
     const intersect = this.renderer.checkMouseIntersection(event);
 

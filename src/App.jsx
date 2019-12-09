@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from "react";
-import { Button, ButtonToolbar } from "react-bootstrap";
+import { Button } from "react-bootstrap";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -48,6 +48,10 @@ class App extends Component {
     this.editor.addShape(shapeNames[shapeIndex], shapePosition);
   };
 
+  handleAddModelClick = () => {
+    this.editor.addCustomModel();
+  };
+
   animate = () => {
     this.editor.render();
     this.requestID = window.requestAnimationFrame(this.animate);
@@ -60,7 +64,7 @@ class App extends Component {
     }
     return (
       <Fragment>
-        <ButtonToolbar className={"button-container"}>
+        <div className={"button-container"}>
           <Button onClick={this.addRandomMesh} variant={"outline-primary"}>
             Add shape
           </Button>
@@ -70,7 +74,13 @@ class App extends Component {
           >
             Delete shape
           </Button>
-        </ButtonToolbar>
+          <Button onClick={this.handleAddModelClick} variant={"primary"}>
+            Add model
+          </Button>
+          <Button onClick={this.addRandomMesh} variant={"primary"}>
+            Fit camera to model
+          </Button>
+        </div>
         <div className={"viewport"} ref={ref => (this.el = ref)} />
       </Fragment>
     );

@@ -37,9 +37,14 @@ export class Renderer {
     ambientLight.name = "AmbientLight";
     this.scene.add(ambientLight);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
+    const directionalLight = new THREE.DirectionalLight(0xffffff);
     directionalLight.name = "DirectionalLight";
-    directionalLight.position.set(1, 1, 1).multiplyScalar(10);
+    directionalLight.castShadow = true;
+    directionalLight.shadow.camera.top = 60;
+    directionalLight.shadow.camera.bottom = -60;
+    directionalLight.shadow.camera.left = -60;
+    directionalLight.shadow.camera.right = 60;
+    directionalLight.position.set(10, 10, 10);
     this.scene.add(directionalLight);
 
     const pointLight = new THREE.PointLight(0xffffff, 0.4);
@@ -60,6 +65,7 @@ export class Renderer {
 
     this.renderer = new THREE.WebGLRenderer();
     this.renderer.setSize(width, height);
+    this.renderer.shadowMap.enabled = true;
 
     window.THREE = THREE;
     window.controls = this.orbitControls;
@@ -85,15 +91,16 @@ export class Renderer {
     this.scene.add(stars);
 
     this.floor = new THREE.Mesh(
-      new THREE.PlaneGeometry(1000, 1000),
-      new THREE.MeshBasicMaterial({ visible: false })
+      new THREE.PlaneBufferGeometry(1000, 1000),
+      new THREE.MeshPhongMaterial({ color: 0x999999, depthWrite: false })
     );
     this.floor.name = "Floor";
     this.floor.position.y = -50;
     this.floor.rotation.x = -Math.PI / 2;
+    this.floor.receiveShadow = true;
     this.scene.add(this.floor);
 
-    this.grid = new THREE.GridHelper(1000, 1000, 0x0000ff, 0x808080);
+    this.grid = new THREE.GridHelper(1000, 40, 0x000000, 0x000000);
     this.grid.name = "Grid";
     this.grid.position.y = -50;
     this.grid.material.transparent = true;
