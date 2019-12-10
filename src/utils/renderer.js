@@ -170,35 +170,26 @@ export class Renderer {
     return intersects[0];
   };
 
-  fitCameraToObject = (object, offset = 5) => {
+  fitCameraToObject = function(object, offset = 1.1) {
     const boundingBox = new THREE.Box3();
 
     boundingBox.setFromObject(object);
 
-    const center = boundingBox.getCenter();
+    const center = boundingBox.getCenter(new THREE.Vector3());
 
-    const size = boundingBox.getSize();
+    const size = boundingBox.getSize(new THREE.Vector3());
 
-    // get the max side of the bounding box (fits to width OR height as needed )
     const maxDim = Math.max(size.x, size.y, size.z);
+
     const fov = this.camera.fov * (Math.PI / 180);
-    let cameraZ = Math.abs((maxDim / 4) * Math.cos(fov * 2));
+    let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2));
+    cameraZ *= offset;
 
-    cameraZ *= offset; // zoom out a little so that objects don't fill the screen
-
+    this.camera.position.x = 0;
+    this.camera.position.y = center.y + 2;
     this.camera.position.z = cameraZ;
-    this.camera.position.y = -25; //half of init state as shapes on 2D
 
-    this.camera.updateProjectionMatrix();
-
-    if (this.orbitControls) {
-      // set camera to rotate around center of loaded object
-      this.orbitControls.target = center;
-
-      this.orbitControls.saveState();
-    } else {
-      this.camera.lookAt(center);
-    }
+    this.orbitControls.target = center;
   };
 
   onMouseDown(callback) {
